@@ -15,9 +15,11 @@ namespace LINQed_List
             IEnumerable<string> LFruits = from fruit in fruits
                                           where fruit.StartsWith("l")
                                           select fruit;
+
+            Console.WriteLine("L Fruits");
             foreach (var fruit in LFruits)
             {
-                Console.WriteLine($"L Fruits {fruit}");
+                Console.WriteLine(fruit);
             }
 
             // Which of the following numbers are multiples of 4 or 6
@@ -27,9 +29,11 @@ namespace LINQed_List
             };
 
             IEnumerable<int> fourSixMultiples = numbers.Where(x => (x % 4 == 0) || (x % 6 == 0));
+
+            Console.WriteLine("Multiple of 4 and 6");
             foreach (var n in fourSixMultiples)
             {
-                Console.WriteLine($"Multiples of 4 and 6 {n}");
+                Console.WriteLine(n);
             }
 
             //Ordering Operations
@@ -44,9 +48,11 @@ namespace LINQed_List
             };
 
             List<string> descend = names.OrderByDescending(x => x).ToList();
+
+            Console.WriteLine("Decending order of words");
             foreach (var name in descend)
             {
-                Console.WriteLine($"Decending order of words {name}");
+                Console.WriteLine(name);
             }
 
             // Build a collection of these numbers sorted in ascending order
@@ -55,9 +61,11 @@ namespace LINQed_List
                 15, 8, 21, 24, 32, 13, 30, 12, 7, 54, 48, 4, 49, 96
             };
             List<int> ascend = numbers2.OrderBy(x => x).ToList();
+
+            Console.WriteLine("Ascending order of numbers");
             foreach (var n in ascend)
             {
-                Console.WriteLine($"Ascending order of numbers {n}");
+                Console.WriteLine(n);
             }
 
             //Aggregate Operations
@@ -103,6 +111,8 @@ namespace LINQed_List
             perfectSquare.ToList().ForEach(num => Console.WriteLine(num));
 
             var altSquaredo = wheresSquaredo.TakeWhile(num => Math.Sqrt(num) % 1 != 0);
+
+            Console.WriteLine("Perfect Square Root");
             foreach (var num in altSquaredo)
             {
                 Console.WriteLine(num);
@@ -138,9 +148,27 @@ namespace LINQed_List
                           group mill.Name by mill.Bank into g
                           select g.Key + " " + g.Count();
 
+            Console.WriteLine("Millionaiares per bank:");
             foreach (var bank in results)
             {
-                Console.WriteLine($"Millionaires per bank: {bank}");
+                Console.WriteLine(bank);
+            }
+
+            //Alternative Names of millionaires
+            IEnumerable<Customer> millClub = customers.Where(c => c.Balance >= 1000000);
+            Console.WriteLine("These people are millionaires");
+            foreach (var c in millClub)
+            {
+                Console.WriteLine(c.Name);
+            }
+
+            //Alternative
+            IEnumerable<IGrouping<string, Customer>> millPerBank = millClub.GroupBy(customer => customer.Bank);
+
+            Console.WriteLine("List of Millioniares per bank alternative");
+            foreach (var m in millPerBank)
+            {
+                Console.WriteLine($"{m.Key} {m.Count()}");
             }
 
             /*
@@ -168,18 +196,19 @@ namespace LINQed_List
                 and `Select()` methods to generate
                 instances of the following class.
             */
-            List<ReportItem> millionaireReport = banks.Join(customers,
-                                                //b.Symbol is equal to c.Bank
-                                                b => b.Symbol,
-                                                c => c.Bank,
-                                                //give results of join
-                                                (bank, customer) =>
-                                                new ReportItem()
-                                                {
-                                                    CustomerName = customer.Name,
-                                                    BankName = bank.Name
-                                                }).ToList();
 
+            List<ReportItem> millionaireReport = (from customer in customers
+                                                  join bank in banks on customer.Bank equals bank.Symbol
+                                                  where customer.Balance >= 1000000
+                                                  //default splits on the space
+                                                  orderby customer.Name.Split()[1]
+                                                  select new ReportItem
+                                                  {
+                                                      CustomerName = customer.Name,
+                                                      BankName = bank.Name
+                                                  }).ToList();
+
+            Console.WriteLine("Millionaires per bank report");
             foreach (var item in millionaireReport)
             {
                 Console.WriteLine($"{item.CustomerName} at {item.BankName}");
